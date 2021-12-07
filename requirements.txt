@@ -1,0 +1,6 @@
+numpy
+matplotlib
+scikit-image
+ipykernel
+argparse
+opencv-python
