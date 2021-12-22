@@ -1,5 +1,5 @@
 import numpy as np
-import skimage
+import skimage.io
 
 def single_yuv2rgb(im, progressive=False, top_field=False):
     final_img_shape = int(im.shape[0] * 2 / 3), im.shape[1]
@@ -68,7 +68,9 @@ def single_yuv2rgb(im, progressive=False, top_field=False):
     rgb_img = np.clip(rgb_img, 0, 1)
     # Convert to uint8 (values between [0, 255])
     rgb_img = (rgb_img * 255).astype(np.uint8)
+
     return rgb_img
+
 
 def yuv2rgb(im_path, out_path=None, progressive=False):
     im = skimage.io.imread(im_path)
@@ -83,12 +85,19 @@ def yuv2rgb(im_path, out_path=None, progressive=False):
         # top field first
         # Convert
         rgb_img_1 = single_yuv2rgb(im[::2], progressive=False, top_field=True)
-        # Copy lines
-        if out_path:
-            skimage.io.imsave(out_path + "1.ppm", rgb_img_1)
 
         # bottom field
         rgb_img_2 = single_yuv2rgb(im[1::2], progressive=False, top_field=False)
+
+        rgb_img_1 = np.vstack([rgb_img_1, rgb_img_1[-2:-1]])
+        rgb_img_1 = rgb_img_1[1:, ...]
+
+        rgb_img_2 = np.vstack([rgb_img_2[:1], rgb_img_2])
+        rgb_img_2 = rgb_img_2[:-1, ...]
+
+        # Copy lines
         if out_path:
+            skimage.io.imsave(out_path + "1.ppm", rgb_img_1)
             skimage.io.imsave(out_path + "2.ppm", rgb_img_2)
+
         return rgb_img_1, rgb_img_2
