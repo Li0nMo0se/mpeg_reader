@@ -6,6 +6,7 @@ import os.path
 import cv2
 import numpy as np
 import time
+from datetime import datetime
 
 import re
 from typing import List
@@ -30,16 +31,25 @@ def sort_nicely(l: List[str]):
     l.sort(key=alphanum_key)
     return l
 
-def handle_display(rgb_im1, rgb_im2):
-    time.sleep(0.01)
+last = datetime.now()
+
+def handle_display(rgb_im1, rgb_im2, fps):
+    global last
+
+    current = datetime.now()
+
+    time.sleep(max((1 / fps) - (current - last).total_seconds(), 0))
     cv2.imshow(f"Output video", rgb_im1[..., ::-1])
     if cv2.waitKey(25) & 0xFF == ord('q'):
         return True
 
-    time.sleep(0.01)
+    time.sleep(1 / fps)
     cv2.imshow(f"Output video", rgb_im2[..., ::-1])
     if cv2.waitKey(25) & 0xFF == ord('q'):
         return True
+
+    last = datetime.now()
+
 
 counter_frame = 0
 def handle_save(rgb_im1, rgb_im2):
@@ -79,7 +89,7 @@ if __name__ == "__main__":
         rgb_im1, rgb_im2 = pgm2ppm.yuv2rgb(im_path, out_path=None, progressive=False)
 
         if args.ppm is None:
-            if handle_display(rgb_im1, rgb_im2): # return true if stop display
+            if handle_display(rgb_im1, rgb_im2, args.fps): # return true if stop display
                 break
         else:
             handle_save(rgb_im1, rgb_im2)
