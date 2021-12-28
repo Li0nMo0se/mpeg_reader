@@ -33,40 +33,36 @@ def sort_nicely(l: List[str]):
 
 last = datetime.now()
 
-def handle_display(rgb_im1, rgb_im2, fps):
+def handle_display(rgb_images, fps):
     global last
 
-    current = datetime.now()
+    for rgb_image in rgb_images:
+        current = datetime.now()
 
-    time.sleep(max((1 / fps) - (current - last).total_seconds(), 0))
-    cv2.imshow(f"Output video", rgb_im1[..., ::-1])
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        return True
+        time.sleep(max((1 / fps) - (current - last).total_seconds(), 0))
+        cv2.imshow(f"Output video", rgb_image[..., ::-1])
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            return True
 
-    time.sleep(1 / fps)
-    cv2.imshow(f"Output video", rgb_im2[..., ::-1])
-    if cv2.waitKey(25) & 0xFF == ord('q'):
-        return True
-
-    last = datetime.now()
+        last = datetime.now()
 
 
 counter_frame = 0
-def handle_save(rgb_im1, rgb_im2):
+def handle_save(rgb_images):
     global counter_frame
-    file1 = os.path.join(args.ppm, f"{str(counter_frame)}.ppm")
-    cv2.imwrite(file1, rgb_im1[..., ::-1])
-    counter_frame += 1
-    file1 = os.path.join(args.ppm, f"{str(counter_frame)}.ppm")
-    cv2.imwrite(file1, rgb_im2[..., ::-1])
-    counter_frame += 1
+
+    for rgb_image in rgb_images:    
+        file1 = os.path.join(args.ppm, f"{str(counter_frame)}.ppm")
+        cv2.imwrite(file1, rgb_image[..., ::-1])
+        counter_frame += 1
 
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="App to live visual mpeg flow")
     parser.add_argument("--input", type=str, help="Folder of mpeg2dec output pgm", required=True)
-    parser.add_argument("--fps", type=float, help="Output fps", default=25.) # FIXME
+    parser.add_argument("--fps", type=float, help="Output fps", default=25.)
     parser.add_argument("--ppm", type=str, help="Output folder, save in ppm (if not show on screen)")
+    parser.add_argument("--progressive", action="store_true", help="Process images as progressive", default=False)
 
     args = parser.parse_args()
 
@@ -80,16 +76,16 @@ if __name__ == "__main__":
         raise ValueError(f"{args.input}: empty folder.")
 
     # Read, convert and display
-    for file in files[:50]:
+    for file in files:
         im_path = os.path.join(args.input, file)
         if im_path.split(".")[-1] != "pgm":
             continue
-        # FIXME: Every image are supposed TFF for now
+
         # Convert yuv from mpeg2dec to rgb image(s)
-        rgb_im1, rgb_im2 = pgm2ppm.yuv2rgb(im_path, out_path=None, progressive=False)
+        rgb_images = pgm2ppm.yuv2rgb(im_path, out_path=None, progressive=args.progressive)
 
         if args.ppm is None:
-            if handle_display(rgb_im1, rgb_im2, args.fps): # return true if stop display
+            if handle_display(rgb_images, args.fps): # return true if stop display
                 break
         else:
-            handle_save(rgb_im1, rgb_im2)
+            handle_save(rgb_images)

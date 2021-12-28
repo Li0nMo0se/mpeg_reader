@@ -80,7 +80,7 @@ def yuv2rgb(im_path, out_path=None, progressive=False):
         rgb_img = single_yuv2rgb(im, progressive=True)
         if out_path:
             skimage.io.imsave(out_path + ".ppm", rgb_img)
-        return rgb_img
+        return [rgb_img]
     else:
         # top field first
         # Convert
@@ -100,4 +100,4 @@ def yuv2rgb(im_path, out_path=None, progressive=False):
             skimage.io.imsave(out_path + "1.ppm", rgb_img_1)
             skimage.io.imsave(out_path + "2.ppm", rgb_img_2)
 
-        return rgb_img_1, rgb_img_2
+        return [rgb_img_1, rgb_img_2]
