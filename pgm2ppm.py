@@ -14,16 +14,6 @@ def single_yuv2rgb(im, progressive=False, top_field=False):
     u_img = im[y_shape[0]:, :u_shape[1]]
     v_img = im[y_shape[0]:, u_shape[1]:]
 
-    # if not progressive and not top_field:
-    #     y_img = y_img[:-1]
-    #     y_img = np.vstack((y_img[0], y_img))
-
-    #     u_img = u_img[:-1]
-    #     u_img = np.vstack((u_img[0], u_img))
-
-    #     v_img = v_img[:-1]
-    #     v_img = np.vstack((v_img[0], v_img))
-
     # Alignment `U` channel
     u_img = np.repeat(np.repeat(u_img, 2, axis=1), 2, axis=0)
 
