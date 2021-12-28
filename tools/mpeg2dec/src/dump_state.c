@@ -32,6 +32,8 @@
 void dump_state (FILE * f, mpeg2_state_t state, const mpeg2_info_t * info,
 		 int offset, int verbose);
 
+static int file_nb = 0;
+
 static struct {
     const mpeg2_sequence_t * ptr;
     mpeg2_sequence_t value;
@@ -157,7 +159,7 @@ static void buf_code_del (const mpeg2_fbuf_t * fbuf)
 
 static int picture_match (const mpeg2_picture_t * pic, struct save_pic * saved)
 {
-    return (saved->ptr == pic && 
+    return (saved->ptr == pic &&
 	    (pic == NULL ||
 	     !memcmp (pic, &saved->value, sizeof (mpeg2_picture_t))));
 }
@@ -382,6 +384,8 @@ void dump_state (FILE * f, mpeg2_state_t state, const mpeg2_info_t * info,
 	fprintf (f, " fields %d", pic->nb_fields);
 	if (pic->flags & PIC_FLAG_TOP_FIELD_FIRST)
 	    fprintf (f, " TFF");
+	if (pic->flags & PIC_FLAG_REPEAT_FIRST_FIELD)
+	    fprintf (f, " RFF");
 	if (pic->flags & PIC_FLAG_TAGS)
 	    fprintf (f, " pts %08x dts %08x", pic->tag, pic->tag2);
 	fprintf (f, " time_ref %d", pic->temporal_reference);
